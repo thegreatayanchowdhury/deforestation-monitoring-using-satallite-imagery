@@ -2,7 +2,6 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 import io
-import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras.applications import EfficientNetB0
 from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
@@ -24,24 +23,20 @@ IMG_SIZE = (224, 224)  # Must match model input
 # =========================
 @st.cache_resource
 def load_models():
-    def build_stage1_model():
-        base = EfficientNetB0(weights=None, include_top=False, input_shape=(224, 224, 3))
-        x = GlobalAveragePooling2D()(base.output)
-        output = Dense(len(STAGE1_CLASSES), activation="softmax")(x)
-        model = Model(base.input, output)
-        model.load_weights(STAGE1_PATH)
-        return model
+    # Stage 1
+    base1 = EfficientNetB0(weights='imagenet', include_top=False, input_shape=(224,224,3))
+    x1 = GlobalAveragePooling2D(name="gap_stage1")(base1.output)
+    out1 = Dense(len(STAGE1_CLASSES), activation="softmax", name="fc_stage1")(x1)
+    stage1_model = Model(base1.input, out1)
+    stage1_model.load_weights(STAGE1_PATH, by_name=True)
 
-    def build_stage2_model():
-        base = EfficientNetB0(weights=None, include_top=False, input_shape=(224, 224, 3))
-        x = GlobalAveragePooling2D()(base.output)
-        output = Dense(len(STAGE2_CLASSES), activation="softmax")(x)
-        model = Model(base.input, output)
-        model.load_weights(STAGE2_PATH)
-        return model
+    # Stage 2
+    base2 = EfficientNetB0(weights='imagenet', include_top=False, input_shape=(224,224,3))
+    x2 = GlobalAveragePooling2D(name="gap_stage2")(base2.output)
+    out2 = Dense(len(STAGE2_CLASSES), activation="softmax", name="fc_stage2")(x2)
+    stage2_model = Model(base2.input, out2)
+    stage2_model.load_weights(STAGE2_PATH, by_name=True)
 
-    stage1_model = build_stage1_model()
-    stage2_model = build_stage2_model()
     return stage1_model, stage2_model
 
 # =========================
@@ -105,7 +100,7 @@ if "logged_in" not in st.session_state:
 if page == "Home":
     st.title("🌳 EuroSAT Deforestation Monitoring")
     st.write("""
-        Two-stage pipeline with **EfficientNetB0** (.h5 models):
+        Two-stage pipeline with **EfficientNetB0** (.h5 models containing only top-layer weights):
         1) Stage 1 → *Forest* vs *Deforestation*  
         2) Stage 2 → If Deforestation → *Industrial, Residential, Highway, etc.*
     """)
