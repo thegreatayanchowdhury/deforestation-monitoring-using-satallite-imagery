@@ -5,6 +5,7 @@ import io
 from tensorflow.keras.models import Model
 from tensorflow.keras.applications import EfficientNetB0
 from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
+from tensorflow.keras.applications.efficientnet import preprocess_input
 
 # =========================
 # Constants
@@ -49,8 +50,9 @@ def read_image(file) -> Image.Image:
 
 def preprocess_pil(img: Image.Image) -> np.ndarray:
     img = img.resize(IMG_SIZE)
-    arr = np.asarray(img, dtype=np.float32) / 255.0
+    arr = np.asarray(img, dtype=np.float32)
     arr = np.expand_dims(arr, axis=0)
+    arr = preprocess_input(arr)
     return arr
 
 def predict_pipeline(pil_img: Image.Image):
@@ -63,9 +65,12 @@ def predict_pipeline(pil_img: Image.Image):
     s1_label = STAGE1_CLASSES[s1_idx]
     s1_conf = float(s1_scores[s1_idx])
 
+    # Debug: top 3 Stage 1 classes
+    top3_s1 = sorted(zip(STAGE1_CLASSES, s1_scores), key=lambda t: t[1], reverse=True)[:3]
+
     if s1_label == "Forest":
         return {
-            "stage1": {"label": s1_label, "confidence": s1_conf},
+            "stage1": {"label": s1_label, "confidence": s1_conf, "top3": top3_s1},
             "final": {"label": "Forest", "explain": "Stage 1 predicts Forest"}
         }
 
@@ -75,9 +80,12 @@ def predict_pipeline(pil_img: Image.Image):
     s2_label = STAGE2_CLASSES[s2_idx]
     s2_conf = float(s2_scores[s2_idx])
 
+    # Debug: top 3 Stage 2 classes
+    top3_s2 = sorted(zip(STAGE2_CLASSES, s2_scores), key=lambda t: t[1], reverse=True)[:3]
+
     return {
-        "stage1": {"label": s1_label, "confidence": s1_conf},
-        "stage2": {"label": s2_label, "confidence": s2_conf},
+        "stage1": {"label": s1_label, "confidence": s1_conf, "top3": top3_s1},
+        "stage2": {"label": s2_label, "confidence": s2_conf, "top3": top3_s2},
         "final": {"label": f"Deforestation → {s2_label}", "explain": "Stage 2 refines deforestation type"}
     }
 
@@ -150,6 +158,9 @@ elif page == "Prediction":
                     st.subheader("Stage 1: Forest vs Deforestation")
                     st.write(f"Prediction: **{s1['label']}**")
                     st.write(f"Confidence: {s1['confidence']:.3f}")
+                    st.write("Top 3 Stage 1 probabilities:")
+                    for lbl, prob in s1["top3"]:
+                        st.write(f"- {lbl}: {prob:.3f}")
 
                     # Stage 2 only if deforestation
                     if s1["label"] == "Deforestation":
@@ -157,6 +168,9 @@ elif page == "Prediction":
                         st.subheader("Stage 2: Deforestation Type")
                         st.write(f"Prediction: **{s2['label']}**")
                         st.write(f"Confidence: {s2['confidence']:.3f}")
+                        st.write("Top 3 Stage 2 probabilities:")
+                        for lbl, prob in s2["top3"]:
+                            st.write(f"- {lbl}: {prob:.3f}")
 
                     # Final
                     st.success(f"Final Prediction: **{result['final']['label']}**")
