@@ -12,8 +12,8 @@ st.set_page_config(page_title="Deforestation Monitor", page_icon="🌳", layout=
 STAGE1_CLASSES = ["Forest", "Deforestation"]
 STAGE2_CLASSES = ["UrbanExpansion", "Infrastructure", "Agriculture", "OtherNatural"]
 
-STAGE1_PATH = "C:\\Users\\ABCD\\Desktop\\Deforestation\\deforestation_outputs\\efficientnet_b0_finalstage1.keras"
-STAGE2_PATH = "C:\\Users\\ABCD\\Desktop\\Deforestation\\deforestation_outputs\\efficientnet_b0_finalStage2.keras"
+STAGE1_PATH = "efficientnet_b0_finalstage1.keras"
+STAGE2_PATH = "efficientnet_b0_finalStage2.keras"
 
 IMG_SIZE = (224, 224)
 
@@ -164,3 +164,4 @@ elif page == "Upload & Predict":
                 st.divider()
                 st.success(f"**Final:** {result['final']['label']}")
                 st.caption(result["final"]["explain"])
+
