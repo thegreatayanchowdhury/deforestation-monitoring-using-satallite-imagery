@@ -3,8 +3,9 @@ import numpy as np
 from PIL import Image
 import io
 import tensorflow as tf
-from tensorflow.keras.models import load_model
+from tensorflow.keras.models import Model
 from tensorflow.keras.applications import EfficientNetB0
+from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
 
 # =========================
 # Constants
@@ -16,17 +17,32 @@ STAGE1_CLASSES = ["Forest", "Deforestation"]
 STAGE2_CLASSES = ["Industrial", "Residential", "Highway", "AnnualCrop",
                   "PermanentCrop", "Pasture", "HerbaceousVegetation", "River"]
 
-IMG_SIZE = (224, 224)  # Must match your training size
+IMG_SIZE = (224, 224)  # Must match model input
 
 # =========================
 # Load Models
 # =========================
 @st.cache_resource
 def load_models():
-    custom_objects = {"EfficientNetB0": EfficientNetB0}
-    s1 = load_model(STAGE1_PATH, compile=False, custom_objects=custom_objects)
-    s2 = load_model(STAGE2_PATH, compile=False, custom_objects=custom_objects)
-    return s1, s2
+    def build_stage1_model():
+        base = EfficientNetB0(weights=None, include_top=False, input_shape=(224, 224, 3))
+        x = GlobalAveragePooling2D()(base.output)
+        output = Dense(len(STAGE1_CLASSES), activation="softmax")(x)
+        model = Model(base.input, output)
+        model.load_weights(STAGE1_PATH)
+        return model
+
+    def build_stage2_model():
+        base = EfficientNetB0(weights=None, include_top=False, input_shape=(224, 224, 3))
+        x = GlobalAveragePooling2D()(base.output)
+        output = Dense(len(STAGE2_CLASSES), activation="softmax")(x)
+        model = Model(base.input, output)
+        model.load_weights(STAGE2_PATH)
+        return model
+
+    stage1_model = build_stage1_model()
+    stage2_model = build_stage2_model()
+    return stage1_model, stage2_model
 
 # =========================
 # Utilities
@@ -152,4 +168,3 @@ elif page == "Prediction":
                     st.caption(result["final"]["explain"])
                 except Exception as e:
                     st.error(f"Prediction failed: {e}")
-
