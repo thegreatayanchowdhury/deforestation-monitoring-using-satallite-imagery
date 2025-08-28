@@ -1,115 +1,154 @@
 import streamlit as st
 import numpy as np
+from PIL import Image
+import io
 import tensorflow as tf
 from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.image import load_img, img_to_array
+from tensorflow.keras.applications import EfficientNetB0
 
 # =========================
-# Load Models
+# Constants
 # =========================
 STAGE1_PATH = "stage1_efficientnetb0.h5"
 STAGE2_PATH = "stage2_deforestation_types_efficientnetb0.h5"
 
-model_stage1 = load_model(STAGE1_PATH, compile=False)
-model_stage2 = load_model(STAGE2_PATH, compile=False)
+STAGE1_CLASSES = ["Forest", "Deforestation"]
+STAGE2_CLASSES = ["Industrial", "Residential", "Highway", "AnnualCrop",
+                  "PermanentCrop", "Pasture", "HerbaceousVegetation", "River"]
+
+IMG_SIZE = (128, 128)  # Must match your training size
 
 # =========================
-# Stage 1: Forest vs Deforestation
+# Load Models
 # =========================
-STAGE1_MAP = {
-    "Forest": "Forest",
-    "Industrial": "Deforestation",
-    "Residential": "Deforestation",
-    "Highway": "Deforestation",
-    "AnnualCrop": "Deforestation",
-    "PermanentCrop": "Deforestation",
-    "Pasture": "Deforestation",
-    "HerbaceousVegetation": "Deforestation",
-    "River": "Deforestation",
-}
-
-# Stage 2: Sub-categories
-STAGE2_MAP = {
-    0: "Industrial",
-    1: "Residential",
-    2: "Highway",
-    3: "AnnualCrop",
-    4: "PermanentCrop",
-    5: "Pasture",
-    6: "HerbaceousVegetation",
-    7: "River",
-}
+@st.cache_resource
+def load_models():
+    custom_objects = {"EfficientNetB0": EfficientNetB0}
+    s1 = load_model(STAGE1_PATH, compile=False, custom_objects=custom_objects)
+    s2 = load_model(STAGE2_PATH, compile=False, custom_objects=custom_objects)
+    return s1, s2
 
 # =========================
-# Utility Function
+# Utilities
 # =========================
-def preprocess_image(image, target_size=(128, 128)):
-    img = load_img(image, target_size=target_size)
-    img_array = img_to_array(img)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array = img_array / 255.0
-    return img_array
+def read_image(file) -> Image.Image:
+    if isinstance(file, (bytes, bytearray)):
+        return Image.open(io.BytesIO(file)).convert("RGB")
+    return Image.open(file).convert("RGB")
 
-def predict(image):
-    img_array = preprocess_image(image)
+def preprocess_pil(img: Image.Image) -> np.ndarray:
+    img = img.resize(IMG_SIZE)
+    arr = np.asarray(img, dtype=np.float32) / 255.0
+    arr = np.expand_dims(arr, axis=0)
+    return arr
 
-    # Stage 1 prediction
-    pred1 = model_stage1.predict(img_array)
-    stage1_class = "Forest" if np.argmax(pred1) == 0 else "Deforestation"
+def predict_pipeline(pil_img: Image.Image):
+    stage1, stage2 = load_models()
+    x = preprocess_pil(pil_img)
 
-    if stage1_class == "Forest":
-        return "Forest"
+    # Stage 1
+    s1_scores = stage1.predict(x, verbose=0)[0]
+    s1_idx = int(np.argmax(s1_scores))
+    s1_label = STAGE1_CLASSES[s1_idx]
+    s1_conf = float(s1_scores[s1_idx])
 
-    # Stage 2 prediction
-    pred2 = model_stage2.predict(img_array)
-    stage2_class = STAGE2_MAP[np.argmax(pred2)]
-    return stage2_class
+    if s1_label == "Forest":
+        return {
+            "stage1": {"label": s1_label, "confidence": s1_conf},
+            "final": {"label": "Forest", "explain": "Stage 1 predicts Forest"}
+        }
+
+    # Stage 2
+    s2_scores = stage2.predict(x, verbose=0)[0]
+    s2_idx = int(np.argmax(s2_scores))
+    s2_label = STAGE2_CLASSES[s2_idx]
+    s2_conf = float(s2_scores[s2_idx])
+
+    return {
+        "stage1": {"label": s1_label, "confidence": s1_conf},
+        "stage2": {"label": s2_label, "confidence": s2_conf},
+        "final": {"label": f"Deforestation → {s2_label}", "explain": "Stage 2 refines deforestation type"}
+    }
 
 # =========================
 # Streamlit App
 # =========================
-def main():
-    st.title("🌍 Deforestation Detection System")
+st.set_page_config(page_title="Deforestation Monitor", page_icon="🌳", layout="centered")
 
-    menu = ["Login", "Home", "Prediction"]
-    choice = st.sidebar.selectbox("Menu", menu)
+# Sidebar navigation
+st.sidebar.title("Navigation")
+page = st.sidebar.radio("Go to", ["Home", "Login", "Prediction"])
 
-    if choice == "Login":
-        st.subheader("Login Section")
+# Session state for login
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+# -------------------------
+# Home Page
+# -------------------------
+if page == "Home":
+    st.title("🌳 EuroSAT Deforestation Monitoring")
+    st.write("""
+        Two-stage pipeline with **EfficientNetB0** (.h5 models):
+        1) Stage 1 → *Forest* vs *Deforestation*  
+        2) Stage 2 → If Deforestation → *Industrial, Residential, Highway, etc.*
+    """)
+    st.info(f"Models to be placed in the same folder:\n- {STAGE1_PATH}\n- {STAGE2_PATH}")
+    try:
+        load_models()
+        st.success("Models are ready for inference.")
+    except Exception as e:
+        st.error(f"Model load issue: {e}")
+
+# -------------------------
+# Login Page
+# -------------------------
+elif page == "Login":
+    st.title("🔐 Login")
+    with st.form("login_form", clear_on_submit=False):
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
+        submit = st.form_submit_button("Sign in")
+    if submit:
+        if username == "admin" and password == "12345":
+            st.session_state.logged_in = True
+            st.success("Signed in successfully.")
+        else:
+            st.error("Invalid Username/Password")
 
-        if st.button("Login"):
-            if username == "admin" and password == "12345":
-                st.success("Logged in as Admin")
-            else:
-                st.error("Invalid Username/Password")
+# -------------------------
+# Prediction Page
+# -------------------------
+elif page == "Prediction":
+    st.title("📤 Upload & Predict")
 
-    elif choice == "Home":
-        st.subheader("Welcome to the Deforestation Detection Project")
-        st.write(
-            """
-            This project uses **EfficientNetB0 models (.h5 format)** to detect
-            whether a given satellite image represents **Forest** or **Deforestation**.
-            
-            - **Stage 1**: Detect Forest vs Deforestation  
-            - **Stage 2**: If Deforestation → classify into Industrial, Residential, Highway, etc.
-            """
-        )
-
-    elif choice == "Prediction":
-        st.subheader("Upload an Image for Prediction")
-
-        image_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
-
-        if image_file is not None:
-            st.image(image_file, caption="Uploaded Image", use_column_width=True)
+    if not st.session_state.logged_in:
+        st.warning("Please log in first on the **Login** page.")
+    else:
+        up_file = st.file_uploader("Upload satellite image", type=["jpg", "jpeg", "png"])
+        if up_file:
+            pil_img = read_image(up_file)
+            st.image(pil_img, caption="Uploaded Image", use_column_width=True)
 
             if st.button("Predict"):
-                label = predict(image_file)
-                st.success(f"Prediction: **{label}**")
+                try:
+                    result = predict_pipeline(pil_img)
 
-if __name__ == "__main__":
-    main()
+                    # Stage 1
+                    s1 = result["stage1"]
+                    st.subheader("Stage 1: Forest vs Deforestation")
+                    st.write(f"Prediction: **{s1['label']}**")
+                    st.write(f"Confidence: {s1['confidence']:.3f}")
 
+                    # Stage 2 only if deforestation
+                    if s1["label"] == "Deforestation":
+                        s2 = result["stage2"]
+                        st.subheader("Stage 2: Deforestation Type")
+                        st.write(f"Prediction: **{s2['label']}**")
+                        st.write(f"Confidence: {s2['confidence']:.3f}")
 
+                    # Final
+                    st.success(f"Final Prediction: **{result['final']['label']}**")
+                    st.caption(result["final"]["explain"])
+                except Exception as e:
+                    st.error(f"Prediction failed: {e}")
