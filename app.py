@@ -16,7 +16,7 @@ STAGE1_CLASSES = ["Forest", "Deforestation"]
 STAGE2_CLASSES = ["Industrial", "Residential", "Highway", "AnnualCrop",
                   "PermanentCrop", "Pasture", "HerbaceousVegetation", "River"]
 
-IMG_SIZE = (128, 128)  # Must match your training size
+IMG_SIZE = (224, 224)  # Must match your training size
 
 # =========================
 # Load Models
@@ -152,3 +152,4 @@ elif page == "Prediction":
                     st.caption(result["final"]["explain"])
                 except Exception as e:
                     st.error(f"Prediction failed: {e}")
+
