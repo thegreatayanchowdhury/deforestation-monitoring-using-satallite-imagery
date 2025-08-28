@@ -4,6 +4,7 @@ from PIL import Image
 import io
 import tensorflow as tf
 from tensorflow.keras.applications.efficientnet import preprocess_input
+import keras  # ✅ Use standalone Keras 3
 
 st.set_page_config(page_title="Deforestation Monitor", page_icon="🌳", layout="centered")
 
@@ -16,19 +17,11 @@ STAGE2_PATH = "efficientnet_b0_finalStage2.keras"
 
 IMG_SIZE = (224, 224)
 
-# ---------- Cached loaders with compatibility ----------
+# ---------- Cached loaders (Keras 3 only) ----------
 @st.cache_resource
 def load_models():
-    try:
-        # Try TensorFlow Keras loader
-        from tensorflow.keras.models import load_model as tf_load_model
-        s1 = tf_load_model(STAGE1_PATH)
-        s2 = tf_load_model(STAGE2_PATH)
-    except Exception:
-        # Fall back to standalone Keras 3 loader
-        import keras
-        s1 = keras.models.load_model(STAGE1_PATH)
-        s2 = keras.models.load_model(STAGE2_PATH)
+    s1 = keras.models.load_model(STAGE1_PATH)
+    s2 = keras.models.load_model(STAGE2_PATH)
     return s1, s2
 
 # Safe checker for model availability
