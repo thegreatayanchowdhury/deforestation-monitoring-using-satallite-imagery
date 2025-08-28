@@ -7,8 +7,8 @@ from tensorflow.keras.preprocessing.image import load_img, img_to_array
 # =========================
 # Load Models
 # =========================
-STAGE1_PATH = "efficientnet_b0_finalstage1.h5"
-STAGE2_PATH = "efficientnet_b0_finalstage2.h5"
+STAGE1_PATH = "stage1_efficientnetb0.h5"
+STAGE2_PATH = "stage2_efficientnetb0.h5"
 
 model_stage1 = load_model(STAGE1_PATH, compile=False)
 model_stage2 = load_model(STAGE2_PATH, compile=False)
@@ -111,3 +111,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
