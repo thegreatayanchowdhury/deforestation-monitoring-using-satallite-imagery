@@ -2,11 +2,13 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 import io
+import os
 from tensorflow.keras.models import Model
 from tensorflow.keras.applications import EfficientNetB0
 from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
 from tensorflow.keras.applications.efficientnet import preprocess_input
-
+admin_user = os.getenv("ADMIN_USER")
+admin_password = os.getenv("ADMIN_PASSWORD")
 # =========================
 # Constants
 # =========================
@@ -129,7 +131,7 @@ elif page == "Login":
         password = st.text_input("Password", type="password")
         submit = st.form_submit_button("Sign in")
     if submit:
-        if username == "admin" and password == "12345":
+        if username == admin_user and password == admin_password:
             st.session_state.logged_in = True
             st.success("Signed in successfully.")
         else:
@@ -177,3 +179,4 @@ elif page == "Prediction":
                     st.caption(result["final"]["explain"])
                 except Exception as e:
                     st.error(f"Prediction failed: {e}")
+
