@@ -179,5 +179,16 @@ elif page == "Prediction":
                     st.caption(result["final"]["explain"])
                 except Exception as e:
                     st.error(f"Prediction failed: {e}")
+st.markdown("---")
+st.markdown(
+    "<small>📘 Model trained on the [EuroSat Dataset](https://www.kaggle.com/datasets/apollo2506/eurosat-dataset) "
+    "EuroSat: A novel dataset and deep learning benchmark for land use and land cover classification, Helber, Patrick and Bischke, Benjamin and Dengel, Andreas and Borth, Damian, IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, 2019, IEEE.</small>",
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    "<small>© 2025 AŚVA. All rights reserved.</small>",
+    unsafe_allow_html=True
+)
 
 
