@@ -108,13 +108,13 @@ if "logged_in" not in st.session_state:
 # Home Page
 # -------------------------
 if page == "Home":
-    st.title("🌳 EuroSAT Deforestation Monitoring")
+    st.title("🌳 Deforestation Monitoring Using Satellite imagery")
     st.write("""
-        Two-stage pipeline with **EfficientNetB0** (.h5 models containing only top-layer weights):
+        Two-stage with **EfficientNetB0**
         1) Stage 1 → *Forest* vs *Deforestation*  
         2) Stage 2 → If Deforestation → *Industrial, Residential, Highway, etc.*
     """)
-    st.info(f"Models to be placed in the same folder:\n- {STAGE1_PATH}\n- {STAGE2_PATH}")
+    # st.info(f"Models to be placed in the same folder:\n- {STAGE1_PATH}\n- {STAGE2_PATH}")
     try:
         load_models()
         st.success("Models are ready for inference.")
@@ -179,4 +179,5 @@ elif page == "Prediction":
                     st.caption(result["final"]["explain"])
                 except Exception as e:
                     st.error(f"Prediction failed: {e}")
+
 
