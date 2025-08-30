@@ -179,7 +179,7 @@ if page == "Home":
     st.markdown("---")
     st.subheader("👨‍💻 Meet Our Team")
 
-        st.markdown("""
+    st.markdown("""
     <div class="team-container">
 
         <a href="https://www.linkedin.com/in/ayan-chowdhury-4b166228b/" target="_blank" style="text-decoration:none;color:inherit;">
@@ -280,5 +280,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
+
 
 
