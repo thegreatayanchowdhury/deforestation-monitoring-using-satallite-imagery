@@ -226,16 +226,12 @@ elif page == "Login":
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
         submit = st.form_submit_button("Sign in")
-
     if submit:
         if username == admin_user and password == admin_password:
             st.session_state.logged_in = True
-            st.success("✅ Signed in successfully. Redirecting...")
-            st.experimental_set_query_params(page="Prediction")
-            st.rerun()  # redirect after login
+            st.success("Signed in successfully.")
         else:
-            st.error("❌ Invalid Username/Password")
-
+            st.error("Invalid Username/Password")
 # -------------------------
 # Prediction Page
 # -------------------------
@@ -283,3 +279,4 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
+
