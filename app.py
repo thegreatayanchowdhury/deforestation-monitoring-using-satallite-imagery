@@ -72,7 +72,6 @@ def predict_pipeline(pil_img: Image.Image):
     s1_label = STAGE1_CLASSES[s1_idx]
     s1_conf = float(s1_scores[s1_idx])
 
-    # Debug: top 3 Stage 1 classes
     top3_s1 = sorted(zip(STAGE1_CLASSES, s1_scores), key=lambda t: t[1], reverse=True)[:3]
 
     if s1_label == "Forest":
@@ -87,7 +86,6 @@ def predict_pipeline(pil_img: Image.Image):
     s2_label = STAGE2_CLASSES[s2_idx]
     s2_conf = float(s2_scores[s2_idx])
 
-    # Debug: top 3 Stage 2 classes
     top3_s2 = sorted(zip(STAGE2_CLASSES, s2_scores), key=lambda t: t[1], reverse=True)[:3]
 
     return {
@@ -105,7 +103,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Add custom CSS for styling
+# Add custom CSS
 st.markdown("""
     <style>
     .stButton>button {
@@ -152,9 +150,8 @@ st.markdown("""
 # Sidebar Navigation
 # =========================
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Login", "Prediction"])
+page = st.sidebar.radio("Go to", ["Home", "Login", "Prediction", "Team"])
 
-# Session state for login
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -175,49 +172,6 @@ if page == "Home":
     except Exception as e:
         st.error(f"⚠️ Model load issue: {e}")
 
-    # Team Section
-    st.markdown("---")
-    st.subheader("👨‍💻 Meet Our Team")
-
-    st.markdown("""
-    <div class="team-container">
-
-        <a href="https://www.linkedin.com/in/ayan-chowdhury-4b166228b/" target="_blank" style="text-decoration:none;color:inherit;">
-            <div class="team-card">
-                <img src="images/ayan.jpg">
-                <h4>AYAN CHOWDHURY</h4>
-                <p>Lead Developer</p>
-            </div>
-        </a>
-
-        <a href="https://www.linkedin.com/in/ashish-kumar-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
-            <div class="team-card">
-                <img src="images/ashish.jpg">
-                <h4>ASHISH KUMAR</h4>
-                <p>ML Engineer</p>
-            </div>
-        </a>
-
-        <a href="https://www.linkedin.com/in/suman-chakraborty-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
-            <div class="team-card">
-                <img src="images/suman.jpg">
-                <h4>SUMAN CHAKRABORTY</h4>
-                <p>Research & Dataset</p>
-            </div>
-        </a>
-
-        <a href="https://www.linkedin.com/in/vishnu-dev-mishra-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
-            <div class="team-card">
-                <img src="images/vishnu.jpg">
-                <h4>VISHNU DEV MISHRA</h4>
-                <p>Research & Dataset</p>
-            </div>
-        </a>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-
 # -------------------------
 # Login Page
 # -------------------------
@@ -233,12 +187,12 @@ elif page == "Login":
             st.success("Signed in successfully.")
         else:
             st.error("Invalid Username/Password")
+
 # -------------------------
 # Prediction Page
 # -------------------------
 elif page == "Prediction":
     st.title("📤 Upload & Predict")
-
     if st.session_state.logged_in is False:
         st.warning("⚠️ Please log in first on the **Login** page.")
     else:
@@ -250,25 +204,57 @@ elif page == "Prediction":
             if st.button("🔍 Predict"):
                 try:
                     result = predict_pipeline(pil_img)
-
-                    # Stage 1
                     s1 = result["stage1"]
                     st.subheader("Stage 1: Forest vs Deforestation")
                     st.write(f"**Prediction:** {s1['label']}")
                     st.progress(s1["confidence"])
-
-                    # Stage 2 only if deforestation
                     if s1["label"] == "Deforestation":
                         s2 = result["stage2"]
                         st.subheader("Stage 2: Deforestation Type")
                         st.write(f"**Prediction:** {s2['label']}")
                         st.progress(s2["confidence"])
-
-                    # Final
                     st.success(f"🌍 Final Prediction: **{result['final']['label']}**")
                     st.caption(result["final"]["explain"])
                 except Exception as e:
                     st.error(f"Prediction failed: {e}")
+
+# -------------------------
+# Team Page
+# -------------------------
+elif page == "Team":
+    st.title("👨‍💻 Meet Our Team")
+    st.markdown("""
+    <div class="team-container">
+        <a href="https://www.linkedin.com/in/ayan-chowdhury-4b166228b/" target="_blank" style="text-decoration:none;color:inherit;">
+            <div class="team-card">
+                <img src="images/ayan.jpg">
+                <h4>AYAN CHOWDHURY</h4>
+                <p>Lead Developer</p>
+            </div>
+        </a>
+        <a href="https://www.linkedin.com/in/ashish-kumar-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
+            <div class="team-card">
+                <img src="images/ashish.jpg">
+                <h4>ASHISH KUMAR</h4>
+                <p>ML Engineer</p>
+            </div>
+        </a>
+        <a href="https://www.linkedin.com/in/suman-chakraborty-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
+            <div class="team-card">
+                <img src="images/suman.jpg">
+                <h4>SUMAN CHAKRABORTY</h4>
+                <p>Research & Dataset</p>
+            </div>
+        </a>
+        <a href="https://www.linkedin.com/in/vishnu-dev-mishra-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
+            <div class="team-card">
+                <img src="images/vishnu.jpg">
+                <h4>VISHNU DEV MISHRA</h4>
+                <p>Research & Dataset</p>
+            </div>
+        </a>
+    </div>
+    """, unsafe_allow_html=True)
 
 # -------------------------
 # Footer
@@ -280,6 +266,3 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
-
-
-
