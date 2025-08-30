@@ -179,7 +179,7 @@ if page == "Home":
     st.markdown("---")
     st.subheader("👨‍💻 Meet Our Team")
 
-    st.markdown("""
+        st.markdown("""
     <div class="team-container">
 
         <a href="https://www.linkedin.com/in/ayan-chowdhury-4b166228b/" target="_blank" style="text-decoration:none;color:inherit;">
@@ -190,25 +190,25 @@ if page == "Home":
             </div>
         </a>
 
-        <a href="https://www.linkedin.com/in/member2-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
+        <a href="https://www.linkedin.com/in/ashish-kumar-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
             <div class="team-card">
-                <img src="images/member2.jpg">
+                <img src="images/ashish.jpg">
                 <h4>ASHISH KUMAR</h4>
                 <p>ML Engineer</p>
             </div>
         </a>
 
-        <a href="https://www.linkedin.com/in/member3-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
+        <a href="https://www.linkedin.com/in/suman-chakraborty-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
             <div class="team-card">
-                <img src="images/member3.jpg">
+                <img src="images/suman.jpg">
                 <h4>SUMAN CHAKRABORTY</h4>
                 <p>Research & Dataset</p>
             </div>
         </a>
 
-        <a href="https://www.linkedin.com/in/member3-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
+        <a href="https://www.linkedin.com/in/vishnu-dev-mishra-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
             <div class="team-card">
-                <img src="images/member3.jpg">
+                <img src="images/vishnu.jpg">
                 <h4>VISHNU DEV MISHRA</h4>
                 <p>Research & Dataset</p>
             </div>
@@ -216,6 +216,7 @@ if page == "Home":
 
     </div>
     """, unsafe_allow_html=True)
+
 
 # -------------------------
 # Login Page
@@ -279,4 +280,5 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
+
 
