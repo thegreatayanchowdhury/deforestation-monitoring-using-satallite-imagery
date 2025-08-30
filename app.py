@@ -7,8 +7,13 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.applications import EfficientNetB0
 from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
 from tensorflow.keras.applications.efficientnet import preprocess_input
+
+# =========================
+# Environment Vars
+# =========================
 admin_user = os.getenv("ADMIN_USER")
 admin_password = os.getenv("ADMIN_PASSWORD")
+
 # =========================
 # Constants
 # =========================
@@ -92,11 +97,60 @@ def predict_pipeline(pil_img: Image.Image):
     }
 
 # =========================
-# Streamlit App
+# Streamlit App Config
 # =========================
-st.set_page_config(page_title="Deforestation Monitor", page_icon="🌳", layout="centered")
+st.set_page_config(
+    page_title="Deforestation Monitor",
+    page_icon="🌳",
+    layout="wide"
+)
 
-# Sidebar navigation
+# Add custom CSS for styling
+st.markdown("""
+    <style>
+    .stButton>button {
+        border-radius: 10px;
+        background-color: #2e7d32;
+        color: white;
+        font-weight: bold;
+    }
+    .stButton>button:hover {
+        background-color: #1b5e20;
+        color: white;
+    }
+    .team-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+    }
+    .team-card {
+        width: 250px;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        background: #f9f9f9;
+        box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    .team-card:hover {
+        transform: scale(1.05);
+        box-shadow: 3px 3px 12px rgba(0,0,0,0.2);
+    }
+    .team-card img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 10px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# =========================
+# Sidebar Navigation
+# =========================
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Home", "Login", "Prediction"])
 
@@ -108,18 +162,60 @@ if "logged_in" not in st.session_state:
 # Home Page
 # -------------------------
 if page == "Home":
-    st.title("🌳 Deforestation Monitoring Using Satellite imagery")
+    st.title("🌳 Deforestation Monitoring Using Satellite Imagery")
     st.write("""
-        Two-stage with **EfficientNetB0**
-        1) Stage 1 → *Forest* vs *Deforestation*  
-        2) Stage 2 → If Deforestation → *Industrial, Residential, Highway, etc.*
+        ### Overview  
+        This project uses a **two-stage EfficientNetB0 pipeline**:  
+        1. Stage 1 → *Forest* vs *Deforestation*  
+        2. Stage 2 → If Deforestation → *Industrial, Residential, Highway, etc.*
     """)
-    # st.info(f"Models to be placed in the same folder:\n- {STAGE1_PATH}\n- {STAGE2_PATH}")
     try:
         load_models()
-        st.success("Models are ready for inference.")
+        st.success("✅ Models are ready for inference.")
     except Exception as e:
-        st.error(f"Model load issue: {e}")
+        st.error(f"⚠️ Model load issue: {e}")
+
+    # Team Section
+    st.markdown("---")
+    st.subheader("👨‍💻 Meet Our Team")
+
+    st.markdown("""
+    <div class="team-container">
+
+        <a href="https://www.linkedin.com/in/ayan-chowdhury-4b166228b/" target="_blank" style="text-decoration:none;color:inherit;">
+            <div class="team-card">
+                <img src="images/ayan.jpg">
+                <h4>AYAN CHOWDHURY</h4>
+                <p>Lead Developer</p>
+            </div>
+        </a>
+
+        <a href="https://www.linkedin.com/in/member2-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
+            <div class="team-card">
+                <img src="images/member2.jpg">
+                <h4>ASHISH KUMAR</h4>
+                <p>ML Engineer</p>
+            </div>
+        </a>
+
+        <a href="https://www.linkedin.com/in/member3-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
+            <div class="team-card">
+                <img src="images/member3.jpg">
+                <h4>SUMAN CHAKRABORTY</h4>
+                <p>Research & Dataset</p>
+            </div>
+        </a>
+
+        <a href="https://www.linkedin.com/in/member3-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
+            <div class="team-card">
+                <img src="images/member3.jpg">
+                <h4>VISHNU DEV MISHRA</h4>
+                <p>Research & Dataset</p>
+            </div>
+        </a>
+
+    </div>
+    """, unsafe_allow_html=True)
 
 # -------------------------
 # Login Page
@@ -130,12 +226,15 @@ elif page == "Login":
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
         submit = st.form_submit_button("Sign in")
+
     if submit:
         if username == admin_user and password == admin_password:
             st.session_state.logged_in = True
-            st.success("Signed in successfully.")
+            st.success("✅ Signed in successfully. Redirecting...")
+            st.experimental_set_query_params(page="Prediction")
+            st.rerun()  # redirect after login
         else:
-            st.error("Invalid Username/Password")
+            st.error("❌ Invalid Username/Password")
 
 # -------------------------
 # Prediction Page
@@ -143,52 +242,44 @@ elif page == "Login":
 elif page == "Prediction":
     st.title("📤 Upload & Predict")
 
-    if not st.session_state.logged_in:
-        st.warning("Please log in first on the **Login** page.")
+    if st.session_state.logged_in is False:
+        st.warning("⚠️ Please log in first on the **Login** page.")
     else:
         up_file = st.file_uploader("Upload satellite image", type=["jpg", "jpeg", "png"])
         if up_file:
             pil_img = read_image(up_file)
             st.image(pil_img, caption="Uploaded Image", use_column_width=True)
 
-            if st.button("Predict"):
+            if st.button("🔍 Predict"):
                 try:
                     result = predict_pipeline(pil_img)
 
                     # Stage 1
                     s1 = result["stage1"]
                     st.subheader("Stage 1: Forest vs Deforestation")
-                    st.write(f"Prediction: **{s1['label']}**")
-                    st.write(f"Confidence: {s1['confidence']:.3f}")
-                    st.write("Top 3 Stage 1 probabilities:")
-                    for lbl, prob in s1["top3"]:
-                        st.write(f"- {lbl}: {prob:.3f}")
+                    st.write(f"**Prediction:** {s1['label']}")
+                    st.progress(s1["confidence"])
 
                     # Stage 2 only if deforestation
                     if s1["label"] == "Deforestation":
                         s2 = result["stage2"]
                         st.subheader("Stage 2: Deforestation Type")
-                        st.write(f"Prediction: **{s2['label']}**")
-                        st.write(f"Confidence: {s2['confidence']:.3f}")
-                        st.write("Top 3 Stage 2 probabilities:")
-                        for lbl, prob in s2["top3"]:
-                            st.write(f"- {lbl}: {prob:.3f}")
+                        st.write(f"**Prediction:** {s2['label']}")
+                        st.progress(s2["confidence"])
 
                     # Final
-                    st.success(f"Final Prediction: **{result['final']['label']}**")
+                    st.success(f"🌍 Final Prediction: **{result['final']['label']}**")
                     st.caption(result["final"]["explain"])
                 except Exception as e:
                     st.error(f"Prediction failed: {e}")
+
+# -------------------------
+# Footer
+# -------------------------
 st.markdown("---")
 st.markdown(
     "<small>📘 Model trained on the [EuroSat Dataset](https://www.kaggle.com/datasets/apollo2506/eurosat-dataset) "
-    "EuroSat: A novel dataset and deep learning benchmark for land use and land cover classification, Helber, Patrick and Bischke, Benjamin and Dengel, Andreas and Borth, Damian, IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, 2019, IEEE.</small>",
+    "EuroSat: Helber et al., IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, 2019.</small>",
     unsafe_allow_html=True
 )
-
-st.markdown(
-    "<small>© 2025 AŚVA. All rights reserved.</small>",
-    unsafe_allow_html=True
-)
-
-
+st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
