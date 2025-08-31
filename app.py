@@ -231,15 +231,18 @@ elif page == "Team":
         {"name": "VISHNU DEV MISHRA", "role": "Research & Dataset", "img": "images/vishnu.jpg", "linkedin": "https://www.linkedin.com/in/vishnu-dev-mishra-linkedin"}
     ]
 
-    # Helper: convert image to Base64
-    def img_to_base64(path):
+    # =========================
+    # Cache Base64 conversion
+    # =========================
+    @st.cache_data
+    def img_to_base64_cached(path):
         with open(path, "rb") as f:
             return base64.b64encode(f.read()).decode()
 
     # Render cards
     cards_html = ""
     for member in team:
-        img_base64 = img_to_base64(member["img"])
+        img_base64 = img_to_base64_cached(member["img"])
         cards_html += f"""
         <div class="team-card">
             <a href="{member['linkedin']}" target="_blank" style="text-decoration:none;color:inherit;">
@@ -249,7 +252,6 @@ elif page == "Team":
             </a>
         </div>
         """
-
     st.markdown(cards_html, unsafe_allow_html=True)
 
 # -------------------------
