@@ -126,8 +126,7 @@ st.markdown("""
     background: #f9f9f9;
     box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
     transition: transform 0.2s;
-    width: 220px;
-    margin: 10px;
+    margin-bottom: 20px;
 }
 .team-card:hover {
     transform: scale(1.05);
@@ -139,11 +138,6 @@ st.markdown("""
     border-radius: 50%;
     object-fit: cover;
     margin-bottom: 10px;
-}
-.team-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -225,6 +219,7 @@ elif page == "Prediction":
 # -------------------------
 elif page == "Team":
     st.title("👨‍💻 Meet Our Team")
+
     team = [
         {"name": "AYAN CHOWDHURY", "role": "Lead Developer", "img": "images/ayan.jpg", "linkedin": "https://www.linkedin.com/in/ayan-chowdhury-4b166228b/"},
         {"name": "ASHISH KUMAR", "role": "ML Engineer", "img": "images/ashish.jpg", "linkedin": "https://www.linkedin.com/in/ashish-kumar-linkedin"},
@@ -232,20 +227,16 @@ elif page == "Team":
         {"name": "VISHNU DEV MISHRA", "role": "Research & Dataset", "img": "images/vishnu.jpg", "linkedin": "https://www.linkedin.com/in/vishnu-dev-mishra-linkedin"}
     ]
 
-    container_html = '<div class="team-container">'
-    for member in team:
-        card_html = f"""
-        <div class="team-card">
-            <a href="{member['linkedin']}" target="_blank" style="text-decoration:none;color:inherit;">
-                <img src="{member['img']}" alt="{member['name']}">
-                <h4>{member['name']}</h4>
-                <p>{member['role']}</p>
-            </a>
-        </div>
-        """
-        container_html += card_html
-    container_html += '</div>'
-    st.markdown(container_html, unsafe_allow_html=True)
+    num_cols = 4
+    for i in range(0, len(team), num_cols):
+        cols = st.columns(num_cols)
+        for col, member in zip(cols, team[i:i+num_cols]):
+            with col:
+                st.markdown(f'<div class="team-card">', unsafe_allow_html=True)
+                st.image(member["img"], width=120)
+                st.markdown(f"[**{member['name']}**]({member['linkedin']})")
+                st.write(member["role"])
+                st.markdown('</div>', unsafe_allow_html=True)
 
 # -------------------------
 # Footer
