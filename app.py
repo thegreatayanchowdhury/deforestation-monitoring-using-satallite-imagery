@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 import io
 import os
+import base64
 from tensorflow.keras.models import Model
 from tensorflow.keras.applications import EfficientNetB0
 from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
@@ -126,7 +127,10 @@ st.markdown("""
     background: #f9f9f9;
     box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
     transition: transform 0.2s;
-    margin-bottom: 20px;
+    margin: 10px;
+    width: 220px;
+    display: inline-block;
+    vertical-align: top;
 }
 .team-card:hover {
     transform: scale(1.05);
@@ -227,16 +231,26 @@ elif page == "Team":
         {"name": "VISHNU DEV MISHRA", "role": "Research & Dataset", "img": "images/vishnu.jpg", "linkedin": "https://www.linkedin.com/in/vishnu-dev-mishra-linkedin"}
     ]
 
-    num_cols = 4
-    for i in range(0, len(team), num_cols):
-        cols = st.columns(num_cols)
-        for col, member in zip(cols, team[i:i+num_cols]):
-            with col:
-                st.markdown(f'<div class="team-card">', unsafe_allow_html=True)
-                st.image(member["img"], width=120)
-                st.markdown(f"[**{member['name']}**]({member['linkedin']})")
-                st.write(member["role"])
-                st.markdown('</div>', unsafe_allow_html=True)
+    # Helper: convert image to Base64
+    def img_to_base64(path):
+        with open(path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+
+    # Render cards
+    cards_html = ""
+    for member in team:
+        img_base64 = img_to_base64(member["img"])
+        cards_html += f"""
+        <div class="team-card">
+            <a href="{member['linkedin']}" target="_blank" style="text-decoration:none;color:inherit;">
+                <img src="data:image/jpeg;base64,{img_base64}" alt="{member['name']}">
+                <h4>{member['name']}</h4>
+                <p>{member['role']}</p>
+            </a>
+        </div>
+        """
+
+    st.markdown(cards_html, unsafe_allow_html=True)
 
 # -------------------------
 # Footer
