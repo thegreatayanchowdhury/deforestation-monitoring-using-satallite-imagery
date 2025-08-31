@@ -7,7 +7,12 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.applications import EfficientNetB0
 from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
 from tensorflow.keras.applications.efficientnet import preprocess_input
+import base64
 
+def get_base64_image(image_path):
+    with open(image_path, "rb") as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
 # =========================
 # Environment Vars
 # =========================
@@ -223,32 +228,36 @@ elif page == "Prediction":
 # -------------------------
 elif page == "Team":
     st.title("👨‍💻 Meet Our Team")
+    ayan_img = get_base64_image("images/ayan.jpg")
+    ashish_img = get_base64_image("images/ashish.jpg")
+    suman_img = get_base64_image("images/suman.jpg")
+    vishnu_img = get_base64_image("images/vishnu.jpg")
     st.markdown("""
     <div class="team-container">
         <a href="https://www.linkedin.com/in/ayan-chowdhury-4b166228b/" target="_blank" style="text-decoration:none;color:inherit;">
             <div class="team-card">
-                <img src="static/images/ayan.jpg">
+                <img src="data:image/jpg;base64,{ayan_img}">
                 <h4>AYAN CHOWDHURY</h4>
                 <p>Lead Developer</p>
             </div>
         </a>
         <a href="https://www.linkedin.com/in/ashish-kumar-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
             <div class="team-card">
-                <img src="static/images/ashish.jpg">
+                <img src="data:image/jpg;base64,{ashish_img}">
                 <h4>ASHISH KUMAR</h4>
                 <p>ML Engineer</p>
             </div>
         </a>
         <a href="https://www.linkedin.com/in/suman-chakraborty-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
             <div class="team-card">
-                <img src="/static/images/suman.jpg">
+                <img src="data:image/jpg;base64,{suman_img}">
                 <h4>SUMAN CHAKRABORTY</h4>
                 <p>Research & Dataset</p>
             </div>
         </a>
         <a href="https://www.linkedin.com/in/vishnu-dev-mishra-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
             <div class="team-card">
-                <img src="static/images/vishnu.jpg">
+                <img src="data:image/jpg;base64,{vishnu_img}">
                 <h4>VISHNU DEV MISHRA</h4>
                 <p>Research & Dataset</p>
             </div>
@@ -266,5 +275,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
+
 
 
