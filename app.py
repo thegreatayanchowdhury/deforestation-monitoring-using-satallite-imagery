@@ -226,9 +226,9 @@ elif page == "Team":
 
     team = [
         {"name": "AYAN CHOWDHURY", "role": "Lead Developer", "img": "images/ayan.jpg", "linkedin": "https://www.linkedin.com/in/ayan-chowdhury-4b166228b/"},
-        {"name": "ASHISH KUMAR", "role": "ML Engineer", "img": "images/ashish.jpg", "linkedin": "https://www.linkedin.com/in/ashish-kumar-linkedin"},
-        {"name": "SUMAN CHAKRABORTY", "role": "Research & Dataset", "img": "images/suman.jpg", "linkedin": "https://www.linkedin.com/in/suman-chakraborty-linkedin"},
-        {"name": "VISHNU DEV MISHRA", "role": "Research & Dataset", "img": "images/vishnu.jpg", "linkedin": "https://www.linkedin.com/in/vishnu-dev-mishra-linkedin"}
+        {"name": "ASHISH KUMAR", "role": "ML Engineer", "img": "images/ashish.jpg", "linkedin": "https://www.linkedin.com/in/ashish-kumar-08902b2a9/"},
+        {"name": "SUMAN CHAKRABORTY", "role": "Research & Dataset", "img": "images/suman.jpg", "linkedin": "https://www.linkedin.com/in/suman-chakraborty-9623102a1"},
+        {"name": "VISHNU DEV MISHRA", "role": "Research & Dataset", "img": "images/vishnu.jpg", "linkedin": "https://www.linkedin.com/in/vishnu-dev-mishra-05b27b28b"}
     ]
 
     # =========================
@@ -264,3 +264,4 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
+
