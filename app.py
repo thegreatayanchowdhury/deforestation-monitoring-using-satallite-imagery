@@ -227,28 +227,28 @@ elif page == "Team":
     <div class="team-container">
         <a href="https://www.linkedin.com/in/ayan-chowdhury-4b166228b/" target="_blank" style="text-decoration:none;color:inherit;">
             <div class="team-card">
-                <img src="images/ayan.jpg">
+                <img src="static/images/ayan.jpg">
                 <h4>AYAN CHOWDHURY</h4>
                 <p>Lead Developer</p>
             </div>
         </a>
         <a href="https://www.linkedin.com/in/ashish-kumar-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
             <div class="team-card">
-                <img src="images/ashish.jpg">
+                <img src="static/images/ashish.jpg">
                 <h4>ASHISH KUMAR</h4>
                 <p>ML Engineer</p>
             </div>
         </a>
         <a href="https://www.linkedin.com/in/suman-chakraborty-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
             <div class="team-card">
-                <img src="images/suman.jpg">
+                <img src="static/images/suman.jpg">
                 <h4>SUMAN CHAKRABORTY</h4>
                 <p>Research & Dataset</p>
             </div>
         </a>
         <a href="https://www.linkedin.com/in/vishnu-dev-mishra-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
             <div class="team-card">
-                <img src="images/vishnu.jpg">
+                <img src="static/images/vishnu.jpg">
                 <h4>VISHNU DEV MISHRA</h4>
                 <p>Research & Dataset</p>
             </div>
@@ -266,3 +266,4 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
+
