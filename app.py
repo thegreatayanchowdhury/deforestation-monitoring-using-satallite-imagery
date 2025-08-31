@@ -241,7 +241,7 @@ elif page == "Team":
         </a>
         <a href="https://www.linkedin.com/in/suman-chakraborty-linkedin" target="_blank" style="text-decoration:none;color:inherit;">
             <div class="team-card">
-                <img src="static/images/suman.jpg">
+                <img src="/static/images/suman.jpg">
                 <h4>SUMAN CHAKRABORTY</h4>
                 <p>Research & Dataset</p>
             </div>
@@ -266,4 +266,5 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
+
 
