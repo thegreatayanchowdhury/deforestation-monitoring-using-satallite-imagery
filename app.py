@@ -7,6 +7,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.applications import EfficientNetB0
 from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
 from tensorflow.keras.applications.efficientnet import preprocess_input
+
 # =========================
 # Environment Vars
 # =========================
@@ -102,47 +103,49 @@ st.set_page_config(
     layout="wide"
 )
 
-# Add custom CSS
+# =========================
+# Custom CSS
+# =========================
 st.markdown("""
-    <style>
-    .stButton>button {
-        border-radius: 10px;
-        background-color: #2e7d32;
-        color: white;
-        font-weight: bold;
-    }
-    .stButton>button:hover {
-        background-color: #1b5e20;
-        color: white;
-    }
-    .team-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 20px;
-    }
-    .team-card {
-        width: 250px;
-        border: 1px solid #ddd;
-        border-radius: 12px;
-        padding: 15px;
-        text-align: center;
-        background: #f9f9f9;
-        box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
-        transition: transform 0.2s;
-    }
-    .team-card:hover {
-        transform: scale(1.05);
-        box-shadow: 3px 3px 12px rgba(0,0,0,0.2);
-    }
-    .team-card img {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        object-fit: cover;
-        margin-bottom: 10px;
-    }
-    </style>
+<style>
+.stButton>button {
+    border-radius: 10px;
+    background-color: #2e7d32;
+    color: white;
+    font-weight: bold;
+}
+.stButton>button:hover {
+    background-color: #1b5e20;
+    color: white;
+}
+.team-card {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    background: #f9f9f9;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+    width: 220px;
+    margin: 10px;
+}
+.team-card:hover {
+    transform: scale(1.05);
+    box-shadow: 3px 3px 12px rgba(0,0,0,0.2);
+}
+.team-card img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+.team-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+</style>
 """, unsafe_allow_html=True)
 
 # =========================
@@ -221,21 +224,22 @@ elif page == "Prediction":
 # Team Page
 # -------------------------
 elif page == "Team":
-    team = [
-    {"name": "AYAN CHOWDHURY", "role": "Lead Developer", "img": "images/ayan.jpg", "linkedin": "https://www.linkedin.com/in/ayan-chowdhury-4b166228b/"},
-    {"name": "ASHISH KUMAR", "role": "ML Engineer", "img": "images/ashish.jpg", "linkedin": "https://www.linkedin.com/in/ashish-kumar-linkedin"},
-    {"name": "SUMAN CHAKRABORTY", "role": "Research & Dataset", "img": "images/suman.jpg", "linkedin": "https://www.linkedin.com/in/suman-chakraborty-linkedin"},
-    {"name": "VISHNU DEV MISHRA", "role": "Research & Dataset", "img": "images/vishnu.jpg", "linkedin": "https://www.linkedin.com/in/vishnu-dev-mishra-linkedin"}
-    ]
     st.title("👨‍💻 Meet Our Team")
+    team = [
+        {"name": "AYAN CHOWDHURY", "role": "Lead Developer", "img": "images/ayan.jpg", "linkedin": "https://www.linkedin.com/in/ayan-chowdhury-4b166228b/"},
+        {"name": "ASHISH KUMAR", "role": "ML Engineer", "img": "images/ashish.jpg", "linkedin": "https://www.linkedin.com/in/ashish-kumar-linkedin"},
+        {"name": "SUMAN CHAKRABORTY", "role": "Research & Dataset", "img": "images/suman.jpg", "linkedin": "https://www.linkedin.com/in/suman-chakraborty-linkedin"},
+        {"name": "VISHNU DEV MISHRA", "role": "Research & Dataset", "img": "images/vishnu.jpg", "linkedin": "https://www.linkedin.com/in/vishnu-dev-mishra-linkedin"}
+    ]
+
     container_html = '<div class="team-container">'
     for member in team:
         card_html = f"""
         <div class="team-card">
             <a href="{member['linkedin']}" target="_blank" style="text-decoration:none;color:inherit;">
-               <img src="{member['img']}" alt="{member['name']}">
-               <h4>{member['name']}</h4>
-               <p>{member['role']}</p>
+                <img src="{member['img']}" alt="{member['name']}">
+                <h4>{member['name']}</h4>
+                <p>{member['role']}</p>
             </a>
         </div>
         """
@@ -253,8 +257,3 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
-
-
-
-
-
