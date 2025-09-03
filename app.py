@@ -4,7 +4,7 @@ from PIL import Image
 import io
 import os
 import base64
-import pickle
+import joblib
 import sklearn
 
 # =========================
@@ -31,9 +31,9 @@ IMG_SIZE = (224, 224)  # Must match model input
 @st.cache_resource
 def load_models():
     with open(STAGE1_PATH, "rb") as f:
-        stage1_model = pickle.load(f)
+        stage1_model = joblib.load(f)
     with open(STAGE2_PATH, "rb") as f:
-        stage2_model = pickle.load(f)
+        stage2_model = joblib.load(f)
     return stage1_model, stage2_model
 
 # =========================
@@ -199,4 +199,5 @@ elif page == "Team":
 # -------------------------
 st.markdown("---")
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
+
 
