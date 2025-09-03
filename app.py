@@ -5,7 +5,9 @@ import io
 import os
 import base64
 import joblib
-import sklearn
+
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input
 
 # =========================
 # Environment Vars
@@ -23,44 +25,48 @@ STAGE1_CLASSES = ["Forest", "Deforestation"]
 STAGE2_CLASSES = ["Industrial", "Residential", "Highway", "AnnualCrop",
                   "PermanentCrop", "Pasture", "HerbaceousVegetation", "River"]
 
-IMG_SIZE = (224, 224)  # Must match model input
+IMG_SIZE = (128, 128)  # must match MobileNetV2 preprocessing
 
 # =========================
 # Load Models
 # =========================
 @st.cache_resource
 def load_models():
-    with open(STAGE1_PATH, "rb") as f:
-        stage1_model = joblib.load(f)
-    with open(STAGE2_PATH, "rb") as f:
-        stage2_model = joblib.load(f)
+    stage1_model = joblib.load(STAGE1_PATH)
+    stage2_model = joblib.load(STAGE2_PATH)
     return stage1_model, stage2_model
 
 # =========================
-# Utilities
+# Feature Extractor
 # =========================
-def read_image(file) -> Image.Image:
-    if isinstance(file, (bytes, bytearray)):
-        return Image.open(io.BytesIO(file)).convert("RGB")
-    return Image.open(file).convert("RGB")
+@st.cache_resource
+def load_feature_extractor():
+    return MobileNetV2(weights="imagenet", include_top=False, pooling="avg")
 
-def preprocess_pil(img: Image.Image) -> np.ndarray:
-    img = img.resize(IMG_SIZE)
-    arr = np.asarray(img, dtype=np.float32)
-    arr = np.expand_dims(arr, axis=0)
-    arr = arr / 255.0   # normalize for sklearn/ML models
-    return arr
+base_model = load_feature_extractor()
 
+def extract_features(pil_img: Image.Image) -> np.ndarray:
+    """Convert PIL image to MobileNetV2 features for RandomForest input."""
+    img = pil_img.resize(IMG_SIZE)
+    x = image.img_to_array(img)
+    x = np.expand_dims(x, axis=0)
+    x = preprocess_input(x)
+    features = base_model.predict(x, verbose=0)
+    return features  # shape (1, n_features)
+
+# =========================
+# Prediction Pipeline
+# =========================
 def predict_pipeline(pil_img: Image.Image):
     stage1, stage2 = load_models()
-    x = preprocess_pil(pil_img)
+    x = extract_features(pil_img)
 
-    # Stage 1
-    s1_scores = stage1.predict(x)[0]
+    # Stage 1: Forest vs Deforestation
+    s1_scores = stage1.predict_proba(x)[0]
     s1_idx = int(np.argmax(s1_scores))
     s1_label = STAGE1_CLASSES[s1_idx]
     s1_conf = float(s1_scores[s1_idx])
-    top3_s1 = sorted(zip(STAGE1_CLASSES, s1_scores), key=lambda t: t[1], reverse=True)[:3]
+    top3_s1 = sorted(zip(STAGE1_CLASSES, s1_scores), key=lambda t: t[1], reverse=True)
 
     if s1_label == "Forest":
         return {
@@ -68,17 +74,18 @@ def predict_pipeline(pil_img: Image.Image):
             "final": {"label": "Forest", "explain": "Stage 1 predicts Forest"}
         }
 
-    # Stage 2
-    s2_scores = stage2.predict(x)[0]
+    # Stage 2: Deforestation subtypes
+    s2_scores = stage2.predict_proba(x)[0]
     s2_idx = int(np.argmax(s2_scores))
     s2_label = STAGE2_CLASSES[s2_idx]
     s2_conf = float(s2_scores[s2_idx])
-    top3_s2 = sorted(zip(STAGE2_CLASSES, s2_scores), key=lambda t: t[1], reverse=True)[:3]
+    top3_s2 = sorted(zip(STAGE2_CLASSES, s2_scores), key=lambda t: t[1], reverse=True)
 
     return {
         "stage1": {"label": s1_label, "confidence": s1_conf, "top3": top3_s1},
         "stage2": {"label": s2_label, "confidence": s2_conf, "top3": top3_s2},
-        "final": {"label": f"Deforestation → {s2_label}", "explain": "Stage 2 refines deforestation type"}
+        "final": {"label": f"Deforestation → {s2_label}",
+                  "explain": "Stage 2 refines deforestation type"}
     }
 
 # =========================
@@ -142,7 +149,7 @@ elif page == "Prediction":
     else:
         up_file = st.file_uploader("Upload satellite image", type=["jpg", "jpeg", "png"])
         if up_file:
-            pil_img = read_image(up_file)
+            pil_img = Image.open(up_file).convert("RGB")
             st.image(pil_img, caption="Uploaded Image", use_column_width=True)
 
             if st.button("🔍 Predict"):
@@ -150,13 +157,11 @@ elif page == "Prediction":
                     result = predict_pipeline(pil_img)
                     s1 = result["stage1"]
                     st.subheader("Stage 1: Forest vs Deforestation")
-                    st.write(f"**Prediction:** {s1['label']}")
-                    st.progress(s1["confidence"])
+                    st.write(f"**Prediction:** {s1['label']} ({s1['confidence']:.2f})")
                     if s1["label"] == "Deforestation":
                         s2 = result["stage2"]
                         st.subheader("Stage 2: Deforestation Type")
-                        st.write(f"**Prediction:** {s2['label']}")
-                        st.progress(s2["confidence"])
+                        st.write(f"**Prediction:** {s2['label']} ({s2['confidence']:.2f})")
                     st.success(f"🌍 Final Prediction: **{result['final']['label']}**")
                     st.caption(result["final"]["explain"])
                 except Exception as e:
@@ -182,16 +187,17 @@ elif page == "Team":
 
     cards_html = ""
     for member in team:
-        img_base64 = img_to_base64_cached(member["img"])
-        cards_html += f"""
-        <div class="team-card">
-            <a href="{member['linkedin']}" target="_blank" style="text-decoration:none;color:inherit;">
-                <img src="data:image/jpeg;base64,{img_base64}" alt="{member['name']}">
-                <h4>{member['name']}</h4>
-                <p>{member['role']}</p>
-            </a>
-        </div>
-        """
+        if os.path.exists(member["img"]):
+            img_base64 = img_to_base64_cached(member["img"])
+            cards_html += f"""
+            <div class="team-card">
+                <a href="{member['linkedin']}" target="_blank" style="text-decoration:none;color:inherit;">
+                    <img src="data:image/jpeg;base64,{img_base64}" alt="{member['name']}">
+                    <h4>{member['name']}</h4>
+                    <p>{member['role']}</p>
+                </a>
+            </div>
+            """
     st.markdown(cards_html, unsafe_allow_html=True)
 
 # -------------------------
@@ -199,5 +205,3 @@ elif page == "Team":
 # -------------------------
 st.markdown("---")
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
-
-
