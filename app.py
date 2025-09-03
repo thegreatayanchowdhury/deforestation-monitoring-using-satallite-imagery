@@ -4,10 +4,7 @@ from PIL import Image
 import io
 import os
 import base64
-from tensorflow.keras.models import Model
-from tensorflow.keras.applications import EfficientNetB0
-from tensorflow.keras.layers import GlobalAveragePooling2D, Dense
-from tensorflow.keras.applications.efficientnet import preprocess_input
+import pickle
 
 # =========================
 # Environment Vars
@@ -18,8 +15,8 @@ admin_password = os.getenv("ADMIN_PASSWORD")
 # =========================
 # Constants
 # =========================
-STAGE1_PATH = "stage1_efficientnetb0.h5"
-STAGE2_PATH = "stage2_deforestation_types_efficientnetb0.h5"
+STAGE1_PATH = "clf_stage1.pkl"
+STAGE2_PATH = "clf_stage2.pkl"
 
 STAGE1_CLASSES = ["Forest", "Deforestation"]
 STAGE2_CLASSES = ["Industrial", "Residential", "Highway", "AnnualCrop",
@@ -32,20 +29,10 @@ IMG_SIZE = (224, 224)  # Must match model input
 # =========================
 @st.cache_resource
 def load_models():
-    # Stage 1
-    base1 = EfficientNetB0(weights='imagenet', include_top=False, input_shape=(224,224,3))
-    x1 = GlobalAveragePooling2D(name="gap_stage1")(base1.output)
-    out1 = Dense(len(STAGE1_CLASSES), activation="softmax", name="fc_stage1")(x1)
-    stage1_model = Model(base1.input, out1)
-    stage1_model.load_weights(STAGE1_PATH, by_name=True)
-
-    # Stage 2
-    base2 = EfficientNetB0(weights='imagenet', include_top=False, input_shape=(224,224,3))
-    x2 = GlobalAveragePooling2D(name="gap_stage2")(base2.output)
-    out2 = Dense(len(STAGE2_CLASSES), activation="softmax", name="fc_stage2")(x2)
-    stage2_model = Model(base2.input, out2)
-    stage2_model.load_weights(STAGE2_PATH, by_name=True)
-
+    with open(STAGE1_PATH, "rb") as f:
+        stage1_model = pickle.load(f)
+    with open(STAGE2_PATH, "rb") as f:
+        stage2_model = pickle.load(f)
     return stage1_model, stage2_model
 
 # =========================
@@ -60,7 +47,7 @@ def preprocess_pil(img: Image.Image) -> np.ndarray:
     img = img.resize(IMG_SIZE)
     arr = np.asarray(img, dtype=np.float32)
     arr = np.expand_dims(arr, axis=0)
-    arr = preprocess_input(arr)
+    arr = arr / 255.0   # normalize for sklearn/ML models
     return arr
 
 def predict_pipeline(pil_img: Image.Image):
@@ -68,11 +55,10 @@ def predict_pipeline(pil_img: Image.Image):
     x = preprocess_pil(pil_img)
 
     # Stage 1
-    s1_scores = stage1.predict(x, verbose=0)[0]
+    s1_scores = stage1.predict(x)[0]
     s1_idx = int(np.argmax(s1_scores))
     s1_label = STAGE1_CLASSES[s1_idx]
     s1_conf = float(s1_scores[s1_idx])
-
     top3_s1 = sorted(zip(STAGE1_CLASSES, s1_scores), key=lambda t: t[1], reverse=True)[:3]
 
     if s1_label == "Forest":
@@ -82,11 +68,10 @@ def predict_pipeline(pil_img: Image.Image):
         }
 
     # Stage 2
-    s2_scores = stage2.predict(x, verbose=0)[0]
+    s2_scores = stage2.predict(x)[0]
     s2_idx = int(np.argmax(s2_scores))
     s2_label = STAGE2_CLASSES[s2_idx]
     s2_conf = float(s2_scores[s2_idx])
-
     top3_s2 = sorted(zip(STAGE2_CLASSES, s2_scores), key=lambda t: t[1], reverse=True)[:3]
 
     return {
@@ -105,48 +90,6 @@ st.set_page_config(
 )
 
 # =========================
-# Custom CSS
-# =========================
-st.markdown("""
-<style>
-.stButton>button {
-    border-radius: 10px;
-    background-color: #2e7d32;
-    color: white;
-    font-weight: bold;
-}
-.stButton>button:hover {
-    background-color: #1b5e20;
-    color: white;
-}
-.team-card {
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    padding: 15px;
-    text-align: center;
-    background: #f9f9f9;
-    box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
-    margin: 10px;
-    width: 220px;
-    display: inline-block;
-    vertical-align: top;
-}
-.team-card:hover {
-    transform: scale(1.05);
-    box-shadow: 3px 3px 12px rgba(0,0,0,0.2);
-}
-.team-card img {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 10px;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# =========================
 # Sidebar Navigation
 # =========================
 st.sidebar.title("Navigation")
@@ -162,7 +105,7 @@ if page == "Home":
     st.title("🌳 Deforestation Monitoring Using Satellite Imagery")
     st.write("""
         ### Overview  
-        This project uses a **two-stage EfficientNetB0 pipeline**:  
+        This project uses a **two-stage ML pipeline**:  
         1. Stage 1 → *Forest* vs *Deforestation*  
         2. Stage 2 → If Deforestation → *Industrial, Residential, Highway, etc.*
     """)
@@ -231,15 +174,11 @@ elif page == "Team":
         {"name": "VISHNU DEV MISHRA", "role": "Research & Dataset", "img": "images/vishnu.jpg", "linkedin": "https://www.linkedin.com/in/vishnu-dev-mishra-05b27b28b"}
     ]
 
-    # =========================
-    # Cache Base64 conversion
-    # =========================
     @st.cache_data
     def img_to_base64_cached(path):
         with open(path, "rb") as f:
             return base64.b64encode(f.read()).decode()
 
-    # Render cards
     cards_html = ""
     for member in team:
         img_base64 = img_to_base64_cached(member["img"])
@@ -258,10 +197,4 @@ elif page == "Team":
 # Footer
 # -------------------------
 st.markdown("---")
-st.markdown(
-    "<small>📘 Model trained on the [EuroSat Dataset](https://www.kaggle.com/datasets/apollo2506/eurosat-dataset) "
-    "EuroSat: Helber et al., IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, 2019.</small>",
-    unsafe_allow_html=True
-)
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
-
