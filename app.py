@@ -79,7 +79,9 @@ def predict_pipeline(pil_img: Image.Image):
     s2_idx = int(np.argmax(s2_scores))
     s2_label = STAGE2_CLASSES[s2_idx]
     s2_conf = float(s2_scores[s2_idx])
-    top3_s2 = sorted(zip(STAGE2_CLASSES, s2_scores), key=lambda t: t[1], reverse=True)
+
+    # Top 3 predictions
+    top3_s2 = sorted(zip(STAGE2_CLASSES, s2_scores), key=lambda t: t[1], reverse=True)[:3]
 
     return {
         "stage1": {"label": s1_label, "confidence": s1_conf, "top3": top3_s1},
@@ -155,15 +157,26 @@ elif page == "Prediction":
             if st.button("🔍 Predict"):
                 try:
                     result = predict_pipeline(pil_img)
+
+                    # Stage 1
                     s1 = result["stage1"]
                     st.subheader("Stage 1: Forest vs Deforestation")
-                    st.write(f"**Prediction:** {s1['label']} ({s1['confidence']:.2f})")
+                    for label, score in s1["top3"]:
+                        st.write(f"- {label}: {score*100:.2f}%")
+                        st.progress(float(score))
+                    st.success(f"✅ Stage 1 Prediction: **{s1['label']}**")
+
+                    # Stage 2
                     if s1["label"] == "Deforestation":
                         s2 = result["stage2"]
                         st.subheader("Stage 2: Deforestation Type")
-                        st.write(f"**Prediction:** {s2['label']} ({s2['confidence']:.2f})")
-                    st.success(f"🌍 Final Prediction: **{result['final']['label']}**")
-                    st.caption(result["final"]["explain"])
+                        st.write("**Top 3 Predictions:**")
+                        for label, score in s2["top3"]:
+                            st.write(f"- {label}: {score*100:.2f}%")
+                            st.progress(float(score))
+                        st.success(f"🌍 Final Prediction: **{result['final']['label']}**")
+                        st.caption(result["final"]["explain"])
+
                 except Exception as e:
                     st.error(f"Prediction failed: {e}")
 
