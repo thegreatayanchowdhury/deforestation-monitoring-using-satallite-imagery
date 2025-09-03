@@ -5,6 +5,7 @@ import io
 import os
 import base64
 import pickle
+import sklearn
 
 # =========================
 # Environment Vars
@@ -198,3 +199,4 @@ elif page == "Team":
 # -------------------------
 st.markdown("---")
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
+
