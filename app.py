@@ -91,6 +91,48 @@ def predict_pipeline(pil_img: Image.Image):
     }
 
 # =========================
+# Custom CSS
+# =========================
+st.markdown("""
+<style>
+.stButton>button {
+    border-radius: 10px;
+    background-color: #2e7d32;
+    color: white;
+    font-weight: bold;
+}
+.stButton>button:hover {
+    background-color: #1b5e20;
+    color: white;
+}
+.team-card {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    background: #f9f9f9;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+    margin: 10px;
+    width: 220px;
+    display: inline-block;
+    vertical-align: top;
+}
+.team-card:hover {
+    transform: scale(1.05);
+    box-shadow: 3px 3px 12px rgba(0,0,0,0.2);
+}
+.team-card img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# =========================
 # Streamlit App Config
 # =========================
 st.set_page_config(
@@ -218,3 +260,4 @@ elif page == "Team":
 # -------------------------
 st.markdown("---")
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
+
