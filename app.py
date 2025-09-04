@@ -249,7 +249,6 @@ elif page == "Team":
                 <a href="{member['linkedin']}" target="_blank" style="text-decoration:none;color:inherit;">
                     <img src="data:image/jpeg;base64,{img_base64}" alt="{member['name']}">
                     <h4>{member['name']}</h4>
-                    <p>{member['role']}</p>
                 </a>
             </div>
             """
@@ -260,5 +259,6 @@ elif page == "Team":
 # -------------------------
 st.markdown("---")
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
+
 
 
