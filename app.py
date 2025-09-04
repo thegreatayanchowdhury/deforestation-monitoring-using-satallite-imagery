@@ -230,7 +230,7 @@ elif page == "Team":
 
     team = [
         {"name": "AYAN CHOWDHURY", "img": "images/ayan.jpg", "linkedin": "https://www.linkedin.com/in/ayan-chowdhury-4b166228b/"},
-        {"name": "ASHISH\nKUMAR", "img": "images/ashish.jpg", "linkedin": "https://www.linkedin.com/in/ashish-kumar-08902b2a9/"},
+        {"name": "ASHISH   KUMAR", "img": "images/ashish.jpg", "linkedin": "https://www.linkedin.com/in/ashish-kumar-08902b2a9/"},
         {"name": "SUMAN CHAKRABORTY", "img": "images/suman.jpg", "linkedin": "https://www.linkedin.com/in/suman-chakraborty-9623102a1"},
         {"name": "VISHNU DEV MISHRA", "img": "images/vishnu.jpg", "linkedin": "https://www.linkedin.com/in/vishnu-dev-mishra-05b27b28b"}
     ]
@@ -259,6 +259,7 @@ elif page == "Team":
 # -------------------------
 st.markdown("---")
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
+
 
 
 
