@@ -258,7 +258,14 @@ elif page == "Team":
 # Footer
 # -------------------------
 st.markdown("---")
+st.markdown(
+    "<small>📘 Model trained on the [EuroSat Dataset](https://www.kaggle.com/datasets/apollo2506/eurosat-dataset) "
+    "EuroSat: Helber et al., IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, 2019.</small>",
+    unsafe_allow_html=True
+)
+st.markdown("---")
 st.markdown("<small>© 2025 AŚVA. All rights reserved.</small>", unsafe_allow_html=True)
+
 
 
 
