@@ -37,17 +37,20 @@ It is deployed as an interactive **Streamlit web application** that allows users
 ---
 
 ## 🗂️ Project Structure
+
+```
 .
-├── app.py # Main Streamlit application
-├── clf_stage1.pkl # Stage 1 RandomForest model
-├── clf_stage2.pkl # Stage 2 RandomForest model
-├── images/ # Team member images
-│ ├── ayan.jpg
-│ ├── ashish.jpg
-│ ├── suman.jpg
-│ └── vishnu.jpg
-├── requirements.txt # Python dependencies
-└── README.md # Project documentation
+├── app.py                  # Main Streamlit application
+├── clf_stage1.pkl          # Stage 1 RandomForest model
+├── clf_stage2.pkl          # Stage 2 RandomForest model
+├── images/                 # Team member images
+│   ├── ayan.jpg
+│   ├── ashish.jpg
+│   ├── suman.jpg
+│   └── vishnu.jpg
+├── requirements.txt        # Python dependencies
+└── README.md               # Project documentation
+```
 
 ---
 
@@ -57,28 +60,63 @@ It is deployed as an interactive **Streamlit web application** that allows users
    ```bash
    git clone https://github.com/yourusername/deforestation-monitor.git
    cd deforestation-monitor
-   
+   ```
+
 2. **Create a virtual environment (optional but recommended)**
+   ```bash
    python -m venv venv
    source venv/bin/activate   # Linux/Mac
    venv\Scripts\activate      # Windows
+   ```
 
 3. **Install dependencies**
+   ```bash
    pip install -r requirements.txt
+   ```
 
 4. **Set environment variables**
+   ```bash
    export ADMIN_USER=your_username
    export ADMIN_PASSWORD=your_password
+   ```
    On Windows (PowerShell):
-     setx ADMIN_USER "your_username"
-     setx ADMIN_PASSWORD "your_password"
+   ```powershell
+   setx ADMIN_USER "your_username"
+   setx ADMIN_PASSWORD "your_password"
+   ```
 
 5. **Run the app**
+   ```bash
    streamlit run app.py
+   ```
 
-📊 Dataset
+---
 
-This project is trained on the EuroSat Dataset
+## 📊 Dataset
 
-EuroSat: Helber et al., IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, 2019.
+This project is trained on the **[EuroSat Dataset](https://www.kaggle.com/datasets/apollo2506/eurosat-dataset)**  
+> EuroSat: Helber et al., IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing, 2019.
 
+---
+
+## 👨‍💻 Team
+
+- [AYAN CHOWDHURY](https://www.linkedin.com/in/ayan-chowdhury-4b166228b/)  
+- [ASHISH KUMAR](https://www.linkedin.com/in/ashish-kumar-08902b2a9/)  
+- [SUMAN CHAKRABORTY](https://www.linkedin.com/in/suman-chakraborty-9623102a1)  
+- [VISHNU DEV MISHRA](https://www.linkedin.com/in/vishnu-dev-mishra-05b27b28b)  
+
+---
+
+## 📜 License
+
+© 2025 **AŚVA**. All rights reserved.  
+
+---
+
+## 🌟 Future Improvements
+
+- Deploy as a cloud-based API for wider accessibility  
+- Add visualization for **deforestation trends over time**  
+- Improve model accuracy with additional datasets  
+- Integrate **explainable AI (XAI)** techniques  
